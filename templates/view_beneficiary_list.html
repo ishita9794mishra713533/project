@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8" />
+  <title>Beneficiary List</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://media.istockphoto.com/id/1046610486/photo/rice-bundle.jpg?s=612x612&w=0&k=20&c=Sbyme9fz30cdi_Lq98oF5RpbqMtq4zYxFzZbLAbuTkk=') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.7);
+      margin: 50px auto;
+      padding: 30px;
+      width: 90%;
+      max-width: 1200px;
+      border-radius: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #f9d342;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: rgba(255, 255, 255, 0.95);
+      color: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #444;
+      color: #fff;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 2px;
+    }
+
+    .approve {
+      background-color: #28a745;
+    }
+
+    .reject {
+      background-color: #dc3545;
+    }
+
+    .distribute {
+      background-color: #007bff;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Beneficiary List</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Beneficiary ID</th>
+          <th>Name</th>
+          <th>Aadhar</th>
+          <th>Address</th>
+          <th>Request</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for beneficiary in beneficiaries %}
+        <tr>
+          <td>{{ beneficiary.id }}</td>
+          <td>{{ beneficiary.name }}</td>
+          <td>{{ beneficiary.aadhar_number }}</td>
+          <td>{{ beneficiary.address }}</td>
+          <td>{{ beneficiary.ration_requested or 'N/A' }}</td>
+          <td>{{ beneficiary.status }}</td>
+          <td>
+            <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
+              <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
+              <input type="hidden" name="status" value="Approved">
+              <button class="btn approve" type="submit">Approve</button>
+            </form>
+            <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
+              <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
+              <input type="hidden" name="status" value="Rejected">
+              <button class="btn reject" type="submit">Reject</button>
+            </form>
+            <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
+              <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
+              <input type="hidden" name="status" value="Distributed">
+              <button class="btn distribute" type="submit">Distribute</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">No beneficiaries found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

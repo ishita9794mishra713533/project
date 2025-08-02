@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>E-Ration Distributor – Add Ration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('https://media.istockphoto.com/id/1211006095/photo/market-seeds-legumes.jpg?s=612x612&w=0&k=20&c=_-r0DN7GPfpLd6nXAQImLgeMJPvNK4sGsjbyWD4PPLQ=') center/cover no-repeat fixed;
+    }
+
+    header {
+      background-color: rgba(44, 62, 80, 0.9);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 30px auto;
+      background: rgba(255, 255, 255, 0.93);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    form label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #2c3e50;
+      color: white;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #1a252f;
+    }
+
+    .flash-message {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .success { background-color: #d4edda; color: #155724; }
+    .danger { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>E-Ration Distributor Portal</h1>
+</header>
+
+<div class="container">
+  <h2>Add New Ration Item</h2>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Form connected to backend -->
+  <form method="POST" action="/add_ration">
+    <label for="item_name">Item Name</label>
+    <input type="text" id="item_name" name="item_name" required />
+
+    <label for="quantity">Quantity Available</label>
+    <input type="number" id="quantity" name="quantity" min="1" required />
+
+    <label for="unit">Unit</label>
+    <select id="unit" name="unit" required>
+      <option value="">Select Unit</option>
+      <option value="kg">Kilogram (kg)</option>
+      <option value="litre">Litre</option>
+      <option value="packet">Packet</option>
+      <option value="bottle">Bottle</option>
+    </select>
+
+    <label for="price_per_unit">Price per Unit (₹)</label>
+    <input type="number" id="price_per_unit" name="price_per_unit" step="0.01" min="0" required />
+
+    <label for="distribution_date">Distribution Date</label>
+    <input type="date" id="distribution_date" name="distribution_date" required />
+
+    <button type="submit">Add Ration</button>
+  </form>
+</div>
+
+</body>
+</html>

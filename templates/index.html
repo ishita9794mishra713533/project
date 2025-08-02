@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Ration Bhandar</title>
+  <style>
+    /* Reset */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body, html { font-family:'Segoe UI', sans-serif; color:#fff; scroll-behavior:smooth; }
+
+    /* Navbar */
+    .navbar {
+      position:fixed; top:0; width:100%; background:rgba(0,0,0,0.8);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 20px; z-index:100;
+    }
+    .nav-emblem { height:40px; }
+    .logo { font-size:1.5em; color:#fdd835; font-weight:bold; }
+    .nav-links { list-style:none; display:flex; gap:15px; }
+    .nav-links a { color:#fff; padding:6px 12px; }
+    .login-btn { background:#fdd835; color:#000; font-weight:bold; border-radius:4px; }
+    .login-btn:hover { background:#c6a700; }
+
+    /* Hero Section */
+    .hero {
+      width:100vw; height:100vh;
+      background: url('https://media.istockphoto.com/id/183261003/photo/coffee-mill-warehouse-outside-nairobi-kenya.jpg?s=612x612&w=0&k=20&c=kar2Y57inhUcl7S-KRndal_hQDY-3jZWz4DVEzqIkWA=') center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center; position:relative; padding-top:60px;
+    }
+    .hero::after {
+      content:""; position:absolute; inset:0; background:rgba(0,0,0,0.6);
+    }
+    .hero-content {
+      position:relative; text-align:center; z-index:1; padding:20px;
+    }
+    .hero-content h1 { font-size:3rem; color:#fdd835; text-shadow:2px 2px 6px #000; }
+    .hero-content p { font-size:1.2rem; margin:15px 0; }
+    .hero-content a { display:inline-block; padding:12px 28px; background:#fdd835; color:#000; border-radius:5px; font-weight:bold; }
+
+    /* Modal using :target */
+    .modal {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.8); visibility:hidden; opacity:0;
+      transition:none; display:flex; align-items:center; justify-content:center;
+    }
+    .modal:target {
+      visibility:visible; opacity:1;
+    }
+    .modal-content {
+      background:#000; color:#fff; padding:30px; max-width:400px; width:90%;
+      border-radius:8px; position:relative;
+    }
+    .modal-content h2 { margin-bottom:20px; text-align:center; color:#fdd835; }
+    .modal-content label { display:block; margin-top:12px; color:#fdd835; }
+    .modal-content input[type=text],
+    .modal-content input[type=password] {
+      width:100%; padding:10px; margin-top:6px;
+      border:1px solid #fff; background:#000; color:#fff; border-radius:4px;
+    }
+    .modal-content .aadhar-option {
+      margin-top:12px; display:flex; align-items:center;
+    }
+    .modal-content .aadhar-option input { margin-right:8px; }
+    .modal-content button {
+      width:100%; margin-top:20px; padding:12px; background:#fdd835;
+      border:none; color:#000; font-weight:bold; border-radius:4px;
+    }
+    .modal-content button:hover { background:#c6a700; }
+    .modal-content .forgot {
+      text-align:right; margin-top:12px; font-size:0.9em;
+    }
+    .modal-content .close-btn {
+      position:absolute; top:10px; right:12px; text-decoration:none; font-size:1.5em; color:#fdd835;
+    }
+
+    /* Main content */
+    main { margin-top:60px; padding:20px; }
+    .container { background:rgba(0,0,0,0.8); padding:30px; border-radius:8px; margin:40px auto; max-width:800px; }
+    .container h2 { color:#fdd835; margin-bottom:15px; }
+    .container p, .container ul { line-height:1.6; color:#fff; }
+    .container ul { list-style:disc inside; }
+    .secondary-btn {
+      display:inline-block; padding:10px 24px; border:2px solid #fdd835;
+      color:#fdd835; border-radius:5px; margin-top:15px;
+      background:transparent;
+    }
+    .secondary-btn:hover { background:#fdd835; color:#000;}
+
+    footer {
+      text-align:center; padding:20px; background:rgba(0,0,0,0.9); margin-top:40px;
+      color:#fff;
+    }
+
+    @media(max-width:600px) {
+      .hero-content h1 { font-size:2.5rem; }
+      .hero-content p { font-size:1rem; }
+      .modal-content { padding:20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Emblem_of_India_%28navy_blue%29.svg" alt="Govt Emblem" class="nav-emblem">
+    <span class="logo">Smart Ration Bhandar</span>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#updates">Updates</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#login-modal" class="login-btn">Distributor Login</a></li>
+    </ul>
+  </nav>
+
+  <header id="home" class="hero">
+    <div class="hero-content">
+      <h1>Smart Ration Bhandar</h1>
+      <p>Transparent & Reliable E‑Ration Distribution</p>
+      <a href="#services">Explore Services</a>
+    </div>
+  </header>
+
+  <!-- Login modal -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <a href="#home" class="close-btn">&times;</a>
+      <h2>Distributor Login</h2>
+      <form action="#" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <div class="aadhar-option">
+          <input type="checkbox" id="aadhar-auth" name="aadhar-auth">
+          <label for="aadhar-auth">Enable Aadhaar-based login</label>
+        </div>
+        <div class="forgot"><a href="#" style="color:#fdd835;">Forgot password?</a></div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <main>
+    <section id="about" class="container">
+      <h2>About TPDS &amp; E‑Ration</h2>
+      <p>The Targeted Public Distribution System (TPDS) delivers subsidized essentials through Aadhaar‑ePoS enabled ration shops. The digital E‑Ration platform ensures tracking from government to distributor, beneficiary authentication, and real‑time reporting.</p>
+    </section>
+
+    <section id="services" class="container">
+      <h2>Key Services</h2>
+      <ul>
+        <li>Aadhaar-based beneficiary verification</li>
+        <li>Real-time stock &amp; inventory tracking</li>
+        <li>Sales transactions &amp; analytics reporting</li>
+        <li>Allocation visibility from government authorities</li>
+        <li>Notifications for stock delays and scheme updates</li>
+        <li>Beneficiary &amp; Fair Price Shop management</li>
+      </ul>
+    </section>
+
+    <section id="updates" class="container">
+      <h2>Latest Updates</h2>
+      <p>✅ 98% e‑PoS adoption across FPS nationwide.</p>
+      <p>🔄 One Nation One Ration Card scheme enabling portability and transparency.</p>
+    </section>
+
+    <section id="contact" class="container">
+      <h2>Contact &amp; Support</h2>
+      <p><strong>Email:</strong> support@smartration.gov.in</p>
+      <p><strong>Helpline:</strong> 1800‑11‑2723</p>
+      <a href="#" class="secondary-btn">Lodge a Grievance</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Ministry of Consumer Affairs · Food &amp; Public Distribution</p>
+  </footer>
+
+</body>
+</html>

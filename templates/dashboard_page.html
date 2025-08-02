@@ -1,0 +1,233 @@
+*<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | E-Ration Distributor Module</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      background: #f1f3f6;
+    }
+    .sidebar {
+      width: 220px;
+      background: #2c3e50;
+      color: #ecf0f1;
+      height: 100vh;
+      padding: 20px;
+      position: fixed;
+    }
+    .sidebar h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar li {
+      margin-bottom: 15px;
+    }
+    .sidebar a {
+      display: block;
+      color: #ecf0f1;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .sidebar a:hover {
+      background: #34495e;
+    }
+    .main {
+      margin-left: 240px;
+      padding: 20px;
+      width: calc(100% - 240px);
+      overflow-y: auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #f0f0f0;
+    }
+    .low-stock {
+      background-color: #fff3cd;
+    }
+    .alert {
+      background-color: #f8d7da;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-left: 5px solid red;
+      color: #721c24;
+      border-radius: 5px;
+    }
+    .chart-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    #sunburst-container {
+      width: 500px;
+      height: 400px;
+    }
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .color-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>E-Ration Panel</h2>
+    <ul>
+      <li><a href="/dashboard">🏠 Dashboard</a></li>
+      <li><a href="/add_ration">➕ Add Ration</a></li>
+      <li><a href="/view_ration">📦 View Ration</a></li>
+      <li><a href="/ration_distribution">📤 Ration Distribution</a></li>
+      <li><a href="/view_beneficiary_list">👥 View Beneficiaries</a></li>
+      <li><a href="/ration_requests">📋 Ration Requests</a></li>
+      <li><a href="/logout">🚪 Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div class="main">
+    <header>
+      <h1>E-Ration Distributor Dashboard</h1>
+    </header>
+
+    <div class="card">
+      <h2>Inventory & Stock Management</h2>
+      <div class="alert">⚠️ Discrepancy: Wheat balance doesn't match with distribution log!</div>
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Current Stock</th><th>Stock Inward</th><th>Stock Outward</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr class="low-stock"><td>Wheat</td><td>30 kg</td><td>300 kg</td><td>270 kg</td><td>⚠️ Low Stock</td></tr>
+          <tr><td>Rice</td><td>180 kg</td><td>200 kg</td><td>20 kg</td><td>OK</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Beneficiary Management</h2>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Entitlement</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>B001</td><td>Asha Devi</td><td>5kg Rice, 2kg Wheat</td><td>Active</td></tr>
+          <tr><td>B002</td><td>Ramesh Yadav</td><td>3kg Rice, 1kg Sugar</td><td>Pending</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Reports & Analytics</h2>
+      <div class="chart-container">
+        <div id="sunburst-container"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Helpdesk & Support</h2>
+      <p>Need help? Contact the central support team at 
+        <a href="mailto:support@eration.gov.in">support@eration.gov.in</a> or call 1800-123-456.
+      </p>
+    </div>
+  </div>
+
+  <!-- Highcharts for Sunburst Chart -->
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/sunburst.js"></script>
+  <script>
+    const kpis = [
+      { id: 'Satisfaction', name: 'Beneficiary Satisfaction', value: 85 },
+      { id: 'FillRate', name: 'Fill Rate', value: 65 },
+      { id: 'DSI', name: 'Days Sales of Inventory', value: 40 },
+      { id: 'Accuracy', name: 'Inventory Accuracy', value: 90 },
+      { id: 'Turnover', name: 'Inventory Turnover Rate', value: 22 }
+    ];
+
+    const data = [{ id: 'root', parent: '', name: 'KPIs' }, ...kpis.map(k => ({
+      id: k.id, parent: 'root', name: k.name, value: k.value
+    }))];
+
+    const chart = Highcharts.chart('sunburst-container', {
+      chart: { height: 400 },
+      title: { text: 'Key Performance Indicators' },
+      series: [{
+        type: "sunburst",
+        data,
+        allowDrillToNode: true,
+        cursor: 'pointer',
+        dataLabels: {
+          format: '{point.name}',
+          filter: {
+            property: 'innerArcLength',
+            operator: '>',
+            value: 16
+          }
+        },
+        levels: [{
+          level: 1,
+          levelIsConstant: false,
+          dataLabels: { rotationMode: 'parallel' },
+          colorByPoint: true
+        }]
+      }],
+      tooltip: { pointFormat: '<b>{point.name}:</b> {point.value}%' }
+    });
+
+    const legendBox = document.getElementById('legend');
+    chart.series[0].points.filter(p => p.parent === 'root').forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'legend-item';
+      div.innerHTML = `<div class="color-box" style="background:${p.color}"></div><span>${p.name} (${p.value}%)</span>`;
+      div.addEventListener('click', () => chart.series[0].setRootNode(p.id));
+      legendBox.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>*

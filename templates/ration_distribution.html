@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ration Distribution</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: url('https://media.istockphoto.com/id/672724468/photo/interior-of-a-industrial-warehouse-with-drag-chemicals.jpg?s=612x612&w=0&k=20&c=92xyX5mgOMn7gTVUan2bZv9Yy3Ff0fk_BgpD54OfqLs=') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+
+    .form-container {
+      position: relative;
+      z-index: 1;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 40px;
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 8px;
+      margin-top: 5%;
+    }
+
+    .form-container h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-container label {
+      display: block;
+      margin: 12px 0 4px;
+      font-weight: bold;
+    }
+
+    .form-container input,
+    .form-container select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .form-container button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #0288d1;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .form-container button:hover {
+      background-color: #026fa1;
+    }
+
+    .flash-message {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .success { background-color: #d4edda; color: #155724; }
+    .danger { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <main class="form-container">
+    <h1>Ration Distribution Form</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="/ration_distribution" method="post">
+      <label for="beneficiaryId">Beneficiary ID:</label>
+      <input type="text" id="beneficiaryId" name="beneficiaryId" required />
+
+      <label for="itemType">Ration Item Type:</label>
+      <select id="itemType" name="itemType" required>
+        <option value="">--Select--</option>
+        <option value="rice">Rice</option>
+        <option value="wheat">Wheat</option>
+        <option value="sugar">Sugar</option>
+        <option value="kerosene">Kerosene</option>
+      </select>
+
+      <label for="quantity">Quantity (kg or L):</label>
+      <input type="number" id="quantity" name="quantity" min="0.1" step="0.1" required />
+
+      <label for="dateDist">Date of Distribution:</label>
+      <input type="date" id="dateDist" name="dateDist" required />
+
+      <button type="submit">Distribute Ration</button>
+    </form>
+  </main>
+</body>
+</html>
