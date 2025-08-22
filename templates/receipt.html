@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Receipt</title>
+</head>
+<body>
+  <h2>Ration Distribution Receipt</h2>
+
+  <p><b>Receipt No:</b> {{ receipt_no }}</p>
+  <p><b>Beneficiary ID:</b> {{ beneficiary_id }}</p>
+  <p><b>Item Type:</b> {{ item_type }}</p>
+  <p><b>Quantity:</b> {{ quantity }}</p>
+  <p><b>Date of Distribution:</b> {{ date_dist }}</p>
+
+  <br>
+  <button onclick="window.print()">🖨 Print Receipt</button>
+  <a href="{{ url_for('download_receipt',
+          receipt_no=receipt_no,
+          beneficiary_id=beneficiary_id,
+          item_type=item_type,
+          quantity=quantity,
+          date_dist=date_dist) }}">
+      <button>⬇ Download PDF</button>
+  </a>
+</body>
+</html>

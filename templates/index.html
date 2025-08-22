@@ -136,8 +136,17 @@
           <input type="checkbox" id="aadhar-auth" name="aadhar-auth">
           <label for="aadhar-auth">Enable Aadhaar-based login</label>
         </div>
-        <div class="forgot"><a href="#" style="color:#fdd835;">Forgot password?</a></div>
+        
         <button type="submit">Login</button>
+
+        <!-- Validation error display -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+              <div style="color:red; margin-top:10px; text-align:center;">
+               {{ messages[0] }}
+              </div>
+          {% endif %}
+        {% endwith %}
       </form>
     </div>
   </div>

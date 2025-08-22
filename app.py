@@ -1,7 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from datetime import datetime
+import io
+import random
 
 app = Flask(__name__)
 app.secret_key = 'secret'  # change this in production
@@ -94,9 +98,10 @@ def index():
             flash("Login successful!", "success")
             return redirect(url_for('dashboard_page'))
         else:
-            flash("Invalid username or password.", "danger")
-    return render_template("index.html")
+             flash("Invalid username or password. Try again.", "error")
+             return redirect(url_for("index") + "#login-modal")
 
+    return render_template("index.html")
 
 @app.route('/dashboard_page')
 def dashboard_page():
@@ -130,26 +135,98 @@ def view_ration():
     return render_template("view_ration.html", items=items)
 
 
-@app.route('/ration_distribution', methods=['GET', 'POST'])
+@app.route("/ration_distribution", methods=["GET", "POST"])
 def ration_distribution():
-    beneficiaries = Beneficiary.query.all()
-    if request.method == 'POST':
-        try:
-            rec = DistributionRecord(
-                beneficiary_id=int(request.form['beneficiaryId']),
-                item_type=request.form['itemType'],
-                quantity=float(request.form['quantity']),
-                distribution_date=datetime.strptime(request.form['dateDist'], '%Y-%m-%d'),
-                distributor_id=session.get('distributor_id')
-            )
-            db.session.add(rec)
-            db.session.commit()
-            flash("Ration distributed successfully.", "success")
-            return redirect(url_for('dashboard_page'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error: {e}", "danger")
-    return render_template("ration_distribution.html", beneficiaries=beneficiaries)
+    if request.method == "POST":
+        beneficiary_id = request.form["beneficiaryId"]
+        item_type = request.form["itemType"]
+        quantity = request.form["quantity"]
+        distribution_date = request.form["distribution_date"]
+
+        # Save record in DB
+        record = DistributionRecord(
+            beneficiary_id=beneficiary_id,
+            item_type=item_type,
+            quantity=float(quantity),
+            distribution_date=datetime.strptime(distribution_date, "%Y-%m-%d"),
+            distributor_id=session.get("distributor_id")  # logged in user
+        )
+        db.session.add(record)
+        db.session.commit()
+
+        # Generate receipt no
+        receipt_no = f"REC-{datetime.now().strftime('%Y%m%d')}-{random.randint(100,999)}"
+
+        flash(f"✅ Ration Distributed Successfully to Beneficiary ID {beneficiary_id}", "success")
+
+        # Redirect to receipt page
+        return redirect(url_for(
+            "receipt",
+            receipt_no=receipt_no,
+            beneficiary_id=beneficiary_id,
+            item_type=item_type,
+            quantity=quantity,
+            date_dist=distribution_date  # ✅ matches receipt()
+        ))
+
+    return render_template("ration_distribution.html")
+
+
+        
+# 🔹 Route: Show Receipt (HTML)
+@app.route("/receipt")
+def receipt():
+    receipt_no = request.args.get("receipt_no")
+    beneficiary_id = request.args.get("beneficiary_id")
+    item_type = request.args.get("item_type")
+    quantity = request.args.get("quantity")
+    date_dist = request.args.get("date_dist")  # ✅ now consistent
+
+    return render_template(
+        "receipt.html",
+        receipt_no=receipt_no,
+        beneficiary_id=beneficiary_id,
+        item_type=item_type,
+        quantity=quantity,
+        date_dist=date_dist
+    )
+
+@app.route("/download_receipt")
+def download_receipt():
+    receipt_no = request.args.get("receipt_no")
+    beneficiary_id = request.args.get("beneficiary_id")
+    item_type = request.args.get("item_type")
+    quantity = request.args.get("quantity")
+    date_dist = request.args.get("date_dist")
+
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Title
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(width / 2, height - 50, "Ration Distribution Receipt")
+
+    # Details
+    p.setFont("Helvetica", 12)
+    y = height - 100
+    p.drawString(100, y, f"Receipt No: {receipt_no}")
+    y -= 20
+    p.drawString(100, y, f"Beneficiary ID: {beneficiary_id}")
+    y -= 20
+    p.drawString(100, y, f"Item Type: {item_type}")
+    y -= 20
+    p.drawString(100, y, f"Quantity: {quantity}")
+    y -= 20
+    p.drawString(100, y, f"Date of Distribution: {date_dist}")
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True,
+                     download_name=f"receipt_{beneficiary_id}.pdf",
+                     mimetype='application/pdf')
 
 
 @app.route('/ration_requests', methods=['GET', 'POST'])
