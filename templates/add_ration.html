@@ -11,13 +11,25 @@
       padding: 0;
       background: url('https://media.istockphoto.com/id/1211006095/photo/market-seeds-legumes.jpg?s=612x612&w=0&k=20&c=_-r0DN7GPfpLd6nXAQImLgeMJPvNK4sGsjbyWD4PPLQ=') center/cover no-repeat fixed;
     }
-
     header {
       background-color: rgba(44, 62, 80, 0.9);
       color: white;
       padding: 20px;
       text-align: center;
+      position: relative;
     }
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      background: #f39c12;
+      color: white;
+      padding: 8px 14px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .back-btn:hover { background: #d35400; }
 
     .container {
       max-width: 850px;
@@ -27,17 +39,9 @@
       border-radius: 12px;
       box-shadow: 0 2px 15px rgba(0,0,0,0.2);
     }
+    h2 { color: #2c3e50; margin-bottom: 20px; }
 
-    h2 {
-      color: #2c3e50;
-      margin-bottom: 20px;
-    }
-
-    form label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    form label { display: block; margin-top: 10px; font-weight: bold; }
 
     input, select {
       width: 100%;
@@ -58,17 +62,14 @@
       cursor: pointer;
       width: 100%;
     }
-
-    button:hover {
-      background-color: #1a252f;
-    }
+    button:hover { background-color: #1a252f; }
 
     .flash-message {
       margin-top: 20px;
-      padding: 10px;
+      padding: 12px;
       border-radius: 6px;
+      font-weight: bold;
     }
-
     .success { background-color: #d4edda; color: #155724; }
     .danger { background-color: #f8d7da; color: #721c24; }
   </style>
@@ -76,25 +77,25 @@
 <body>
 
 <header>
+  <a href="{{ url_for('dashboard_page') }}" class="back-btn">← Back to Dashboard</a>
   <h1>E-Ration Distributor Portal</h1>
 </header>
 
 <div class="container">
   <h2>Add New Ration Item</h2>
 
-  <!-- Flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="flash-message {{ category }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+  <!-- Flash messages (frontend only) -->
+  <div id="flash-container"></div>
 
-  <!-- Form connected to backend -->
-  <form method="POST" action="/add_ration">
+  <form id="rationForm" method="POST" action="/add_ration">
     <label for="item_name">Item Name</label>
-    <input type="text" id="item_name" name="item_name" required />
+    <select id="item_name" name="item_name" required>
+      <option value="">Select Item</option>
+      <option value="wheat">Wheat</option>
+      <option value="rice">Rice</option>
+      <option value="sugar">Sugar</option>
+      <option value="kerosene oil">Kerosene Oil</option>
+    </select>
 
     <label for="quantity">Quantity Available</label>
     <input type="number" id="quantity" name="quantity" min="1" required />
@@ -103,8 +104,8 @@
     <select id="unit" name="unit" required>
       <option value="">Select Unit</option>
       <option value="kg">Kilogram (kg)</option>
-      <option value="litre">Litre</option>
       <option value="packet">Packet</option>
+      <option value="litre">Litre</option>
       <option value="bottle">Bottle</option>
     </select>
 
@@ -117,6 +118,54 @@
     <button type="submit">Add Ration</button>
   </form>
 </div>
+
+<script>
+  document.getElementById("rationForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    let item = document.getElementById("item_name").value;
+    let qty = parseInt(document.getElementById("quantity").value);
+    let unit = document.getElementById("unit").value;
+    let price = parseFloat(document.getElementById("price_per_unit").value);
+    let date = document.getElementById("distribution_date").value;
+
+    let flash = document.getElementById("flash-container");
+    flash.innerHTML = "";
+
+    function showMessage(msg, type="danger") {
+      flash.innerHTML = `<div class="flash-message ${type}">${msg}</div>`;
+    }
+
+    // Unit validation
+    if (["wheat","rice","sugar"].includes(item) && !["kg","packet"].includes(unit)) {
+      return showMessage("Invalid unit! Wheat, Rice, Sugar must be in kg or packet.");
+    }
+    if (item === "kerosene oil" && !["litre","bottle"].includes(unit)) {
+      return showMessage("Invalid unit! Kerosene Oil must be in litre or bottle.");
+    }
+
+    // Quantity validation: 5kg per beneficiary (multiple of 5)
+    if (["wheat","rice","sugar"].includes(item) && qty % 5 !== 0) {
+      return showMessage("Quantity must be in multiples of 5 (5kg per person).");
+    }
+
+    // Price validation
+    if (["wheat","rice","sugar"].includes(item) && price !== 32) {
+      return showMessage("Price must be ₹32 per kg for Wheat, Rice, and Sugar.");
+    }
+    if (item === "kerosene oil" && price !== 40) {
+      return showMessage("Price must be ₹40 per litre for Kerosene Oil.");
+    }
+
+    // Date validation: must be 20XX
+    let year = new Date(date).getFullYear();
+    if (!/^20\d{2}$/.test(year)) {
+      return showMessage("Distribution year must be in 20XX format.");
+    }
+
+    showMessage("Ration item added successfully!", "success");
+    setTimeout(() => e.target.submit(), 1200); // submit after flash
+  });
+</script>
 
 </body>
 </html>

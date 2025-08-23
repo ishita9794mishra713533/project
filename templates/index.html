@@ -18,7 +18,7 @@
     .nav-emblem { height:40px; }
     .logo { font-size:1.5em; color:#fdd835; font-weight:bold; }
     .nav-links { list-style:none; display:flex; gap:15px; }
-    .nav-links a { color:#fff; padding:6px 12px; }
+    .nav-links a { color:#fff; padding:6px 12px; text-decoration:none; }
     .login-btn { background:#fdd835; color:#000; font-weight:bold; border-radius:4px; }
     .login-btn:hover { background:#c6a700; }
 
@@ -42,11 +42,10 @@
     .modal {
       position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.8); visibility:hidden; opacity:0;
-      transition:none; display:flex; align-items:center; justify-content:center;
+      display:flex; align-items:center; justify-content:center; transition:none;
+      z-index:105;
     }
-    .modal:target {
-      visibility:visible; opacity:1;
-    }
+    .modal:target { visibility:visible; opacity:1; }
     .modal-content {
       background:#000; color:#fff; padding:30px; max-width:400px; width:90%;
       border-radius:8px; position:relative;
@@ -64,7 +63,7 @@
     .modal-content .aadhar-option input { margin-right:8px; }
     .modal-content button {
       width:100%; margin-top:20px; padding:12px; background:#fdd835;
-      border:none; color:#000; font-weight:bold; border-radius:4px;
+      border:none; color:#000; font-weight:bold; border-radius:4px; cursor:pointer;
     }
     .modal-content button:hover { background:#c6a700; }
     .modal-content .forgot {
@@ -87,9 +86,10 @@
     }
     .secondary-btn:hover { background:#fdd835; color:#000;}
 
-    footer {
-      text-align:center; padding:20px; background:rgba(0,0,0,0.9); margin-top:40px;
-      color:#fff;
+    /* Back to Dashboard button */
+    .dashboard-btn {
+      position:fixed; top:15px; right:20px; background:#fdd835; color:#000; 
+      padding:10px 20px; font-weight:bold; border-radius:5px; z-index:101; text-decoration:none;
     }
 
     @media(max-width:600px) {
@@ -98,8 +98,21 @@
       .modal-content { padding:20px; }
     }
   </style>
+  <script>
+    function validateLogin(event) {
+      const aadhaarCheck = document.getElementById('aadhar-auth');
+      if(!aadhaarCheck.checked) {
+        alert("Aadhaar-based login must be enabled to proceed.");
+        event.preventDefault();
+        return false;
+      }
+      return true;
+    }
+  </script>
 </head>
 <body>
+
+  
 
   <nav class="navbar">
     <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Emblem_of_India_%28navy_blue%29.svg" alt="Govt Emblem" class="nav-emblem">
@@ -127,14 +140,14 @@
     <div class="modal-content">
       <a href="#home" class="close-btn">&times;</a>
       <h2>Distributor Login</h2>
-      <form action="#" method="post">
+      <form action="#" method="post" onsubmit="validateLogin(event)">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
         <div class="aadhar-option">
-          <input type="checkbox" id="aadhar-auth" name="aadhar-auth">
-          <label for="aadhar-auth">Enable Aadhaar-based login</label>
+          <input type="checkbox" id="aadhar-auth" name="aadhar-auth" required>
+          <label for="aadhar-auth">Enable Aadhaar-based login (mandatory)</label>
         </div>
         
         <button type="submit">Login</button>
@@ -154,7 +167,7 @@
   <main>
     <section id="about" class="container">
       <h2>About TPDS &amp; E‑Ration</h2>
-      <p>The Targeted Public Distribution System (TPDS) delivers subsidized essentials through Aadhaar‑ePoS enabled ration shops. The digital E‑Ration platform ensures tracking from government to distributor, beneficiary authentication, and real‑time reporting.</p>
+      <p>The Targeted Public Distribution System (TPDS) delivers subsidized essentials through Aadhaar‑ePoS enabled ration shops. The digital E‑Ration platform ensures tracking from government to distributor, beneficiary authentication, and real-time reporting.</p>
     </section>
 
     <section id="services" class="container">

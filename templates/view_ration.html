@@ -17,6 +17,22 @@
       color: white;
       padding: 20px;
       text-align: center;
+      position: relative;
+    }
+
+    a.back-dashboard {
+      display: inline-block;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 6px 12px;
+      background-color: #2c3e50;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    a.back-dashboard:hover {
+      background-color: #1f2d3a;
     }
 
     .container {
@@ -103,6 +119,7 @@
   <header>
     <h1>E-Ration Distributor Module</h1>
     <p>View Ration Items Added by Distributor</p>
+    <a href="{{ url_for('dashboard_page') }}" class="back-dashboard">← Back to Dashboard</a>
   </header>
 
   <div class="container">

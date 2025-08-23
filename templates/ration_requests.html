@@ -11,9 +11,25 @@
       padding: 0;
     }
 
+    /* Back to Dashboard Button */
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+      text-decoration: none;
+      z-index: 1000;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+    .back-btn:hover { opacity: 0.85; }
+
     .container {
       max-width: 500px;
-      margin: 50px auto;
+      margin: 80px auto;
       background: white;
       padding: 30px;
       border-radius: 10px;
@@ -69,39 +85,122 @@
 </head>
 <body>
 
+  <!-- Back to Dashboard -->
+  <a href="{{ url_for('dashboard_page') }}" class="back-btn">Back to Dashboard</a>
+
   <div class="container">
     <h2>Submit Ration Request</h2>
 
     <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message {{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <div id="flashMessage" class="flash-message" style="display:none;"></div>
 
-    <form method="POST" action="/ration_requests">
+    <form id="rationForm" method="POST" action="/ration_requests">
       <label for="beneficiary_id">Beneficiary:</label>
       <select name="beneficiary_id" id="beneficiary_id" required>
         <option value="">-- Select Beneficiary --</option>
         {% for b in beneficiaries %}
-          <option value="{{ b.id }}">{{ b.name }}</option>
+          <option value="{{ b.id }}" data-members="{{ b.family_members }}">{{ b.name }}</option>
         {% endfor %}
       </select>
 
       <label for="item_name">Item Name:</label>
-      <input type="text" name="item_name" id="item_name" required>
+      <select name="item_name" id="item_name" required>
+        <option value="">-- Select Item --</option>
+        <option value="Wheat">Wheat</option>
+        <option value="Rice">Rice</option>
+        <option value="Kerosene Oil">Kerosene Oil</option>
+        <option value="Sugar">Sugar</option>
+      </select>
+
+      <label for="quantity">Quantity:</label>
+      <input type="number" name="quantity" id="quantity" required>
 
       <label for="unit">Unit:</label>
       <input type="text" name="unit" id="unit" required>
 
-      <label for="month">Month:</label>
-      <input type="text" name="month" id="month" placeholder="e.g., August 2025" required>
+      <label for="price">Price per Unit:</label>
+      <input type="number" name="price" id="price" required>
+
+      <label for="month">Distribution Month (e.g., August 2025):</label>
+      <input type="text" name="month" id="month" required>
 
       <button type="submit">Submit Request</button>
     </form>
   </div>
+
+<script>
+  const form = document.getElementById('rationForm');
+  const flashMessage = document.getElementById('flashMessage');
+
+  // Track submissions per beneficiary per month
+  const submittedRequests = {}; // e.g., { "beneficiaryId-month": true }
+
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    let valid = true;
+
+    const beneficiarySelect = document.getElementById('beneficiary_id');
+    const beneficiaryId = beneficiarySelect.value;
+    const members = parseInt(beneficiarySelect.selectedOptions[0].dataset.members || 1);
+
+    const item = document.getElementById('item_name').value;
+    const quantity = parseFloat(document.getElementById('quantity').value);
+    const unit = document.getElementById('unit').value.toLowerCase();
+    const price = parseFloat(document.getElementById('price').value);
+    const month = document.getElementById('month').value.trim();
+    const monthRegex = /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/;
+
+    // Check if beneficiary already submitted this month
+    const key = beneficiaryId + '-' + month;
+    if (submittedRequests[key]) {
+      alert('This beneficiary has already submitted a request for ' + month);
+      valid = false;
+    }
+
+    // Quantity validation
+    let maxQty = 5 * members;
+    if (['wheat','rice','sugar'].includes(item.toLowerCase())) {
+      if (!['kg','packet'].includes(unit)) {
+        alert('Unit for '+item+' should be kg or packet');
+        valid = false;
+      }
+      if (quantity > maxQty) {
+        alert('Quantity exceeds allowed limit: '+maxQty+' for '+members+' family members');
+        valid = false;
+      }
+    } else if (item.toLowerCase() == 'kerosene oil') {
+      if (!['litre','bottle'].includes(unit)) {
+        alert('Unit for Kerosene Oil should be litre or bottle');
+        valid = false;
+      }
+    }
+
+    // Price validation
+    if (price <= 0) {
+      alert('Price per unit should be greater than 0');
+      valid = false;
+    }
+
+    // Month validation
+    if (!monthRegex.test(month)) {
+      alert('Month format invalid. Use e.g., August 2025');
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    // Mark as submitted
+    submittedRequests[key] = true;
+
+    // Show flash message
+    flashMessage.textContent = 'Your request has been submitted successfully!';
+    flashMessage.className = 'flash-message success';
+    flashMessage.style.display = 'block';
+
+    // Optionally, reset form
+    form.reset();
+  });
+</script>
 
 </body>
 </html>

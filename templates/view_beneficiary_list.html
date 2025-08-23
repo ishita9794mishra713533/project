@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8" />
   <title>Beneficiary List</title>
   <style>
@@ -12,6 +11,25 @@
       background: url('https://media.istockphoto.com/id/1046610486/photo/rice-bundle.jpg?s=612x612&w=0&k=20&c=Sbyme9fz30cdi_Lq98oF5RpbqMtq4zYxFzZbLAbuTkk=') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
+    }
+
+    /* Back to Dashboard Button in top-left corner */
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      z-index: 1000;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .back-btn:hover {
+      opacity: 0.85;
     }
 
     .container {
@@ -61,6 +79,8 @@
       cursor: pointer;
       font-weight: bold;
       margin: 2px;
+      text-decoration: none;
+      display: inline-block;
     }
 
     .approve {
@@ -81,6 +101,9 @@
   </style>
 </head>
 <body>
+  <!-- Back to Dashboard Button -->
+  <a href="{{ url_for('dashboard_page') }}" class="back-btn">Back to Dashboard</a>
+
   <div class="container">
     <h1>Beneficiary List</h1>
     <table>
@@ -103,23 +126,24 @@
           <td>{{ beneficiary.aadhar_number }}</td>
           <td>{{ beneficiary.address }}</td>
           <td>{{ beneficiary.ration_requested or 'N/A' }}</td>
-          <td>{{ beneficiary.status }}</td>
+          <td>{{ beneficiary.status or 'Pending' }}</td>
           <td>
-            <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
-              <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
-              <input type="hidden" name="status" value="Approved">
-              <button class="btn approve" type="submit">Approve</button>
-            </form>
-            <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
-              <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
-              <input type="hidden" name="status" value="Rejected">
-              <button class="btn reject" type="submit">Reject</button>
-            </form>
-            <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
-              <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
-              <input type="hidden" name="status" value="Distributed">
-              <button class="btn distribute" type="submit">Distribute</button>
-            </form>
+            {% if beneficiary.status == 'Pending' or not beneficiary.status %}
+              <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
+                <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
+                <input type="hidden" name="status" value="Approved">
+                <button class="btn approve" type="submit">Approve</button>
+              </form>
+              <form action="{{ url_for('update_status') }}" method="post" style="display:inline;">
+                <input type="hidden" name="beneficiary_id" value="{{ beneficiary.id }}">
+                <input type="hidden" name="status" value="Rejected">
+                <button class="btn reject" type="submit">Reject</button>
+              </form>
+            {% endif %}
+
+            {% if beneficiary.status == 'Approved' %}
+              <a href="{{ url_for('ration_distribution', beneficiary_id=beneficiary.id) }}" class="btn distribute">Distribute</a>
+            {% endif %}
           </td>
         </tr>
         {% else %}

@@ -1,234 +1,253 @@
-*<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard | E-Ration Distributor Module</title>
+  <title>E-Ration Distributor Dashboard</title>
+
+  <!-- Plotly for Charts -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      background: #f1f3f6;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
     }
+
+    header {
+      background: #004d40;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      text-align: center; /* ✅ Title centered */
+    }
+
+    /* Sidebar Styling */
     .sidebar {
-      width: 220px;
-      background: #2c3e50;
-      color: #ecf0f1;
-      height: 100vh;
-      padding: 20px;
+      height: 100%;
+      width: 0;  /* Hidden initially */
       position: fixed;
+      top: 0;
+      left: 0;
+      background: linear-gradient(180deg, #004d40, #00796b);
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      box-shadow: 3px 0 10px rgba(0,0,0,0.5);
+      z-index: 1000;
     }
+
+    .sidebar a {
+      padding: 12px 24px;
+      text-decoration: none;
+      font-size: 18px;
+      color: white;
+      display: block;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255,255,255,0.2);
+      padding-left: 32px;
+    }
+
     .sidebar h2 {
-      font-size: 20px;
+      color: white;
+      text-align: center;
       margin-bottom: 20px;
     }
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-    }
-    .sidebar li {
-      margin-bottom: 15px;
-    }
-    .sidebar a {
-      display: block;
-      color: #ecf0f1;
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 5px;
+
+    /* Menu Button */
+    .menu-btn {
+      font-size: 20px;
+      background: #004d40;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      border-radius: 8px;
       transition: background 0.3s;
     }
-    .sidebar a:hover {
-      background: #34495e;
+
+    .menu-btn:hover {
+      background: #00796b;
     }
+
+    /* Main Content */
     .main {
-      margin-left: 240px;
+      margin-left: 0;
       padding: 20px;
-      width: calc(100% - 240px);
-      overflow-y: auto;
+      transition: margin-left 0.5s;
     }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
+
+    /* Layout Grids */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
     }
+
     .card {
-      background: #fff;
-      border-radius: 8px;
+      background: white;
       padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
     }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
     }
+
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       padding: 8px;
-      text-align: left;
+      text-align: center;
     }
+
     th {
-      background: #f0f0f0;
+      background: #004d40;
+      color: white;
     }
-    .low-stock {
-      background-color: #fff3cd;
-    }
-    .alert {
-      background-color: #f8d7da;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-left: 5px solid red;
-      color: #721c24;
-      border-radius: 5px;
-    }
+
+    /* Chart Container */
     .chart-container {
-      display: flex;
-      align-items: flex-start;
-      gap: 30px;
-      flex-wrap: wrap;
+      margin-top: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    #sunburst-container {
-      width: 500px;
-      height: 400px;
-    }
-    .legend {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-    }
-    .color-box {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-    }
+
   </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>E-Ration Panel</h2>
-    <ul>
-      <li><a href="/dashboard">🏠 Dashboard</a></li>
-      <li><a href="/add_ration">➕ Add Ration</a></li>
-      <li><a href="/view_ration">📦 View Ration</a></li>
-      <li><a href="/view_beneficiary_list">📊 View Beneficiaries</a></li>
-      <li><a href="/ration_distribution">📤 Ration Distribution</a></li>
-      
-      <li><a href="/ration_requests">📋 Ration Requests</a></li>
-      <li><a href="/logout">🚪 Logout</a></li>
-    </ul>
+  <!-- Sidebar Menu -->
+  <button class="menu-btn" onclick="toggleNav()">☰ Menu</button>
+  <div id="sidebar" class="sidebar">
+    <h2>Navigation</h2>
+    
+    <li><a href="/add_ration">➕ Add Ration</a></li> 
+    <li><a href="/view_ration">📦 View Ration</a></li> 
+    <li><a href="/view_beneficiary_list">📊 View Beneficiaries</a></li> 
+    <li><a href="/ration_distribution">📤 Ration Distribution</a></li> 
+    <li><a href="/ration_requests">📋 Ration Requests</a></li> 
+    <li><a href="/logout">🚪 Logout</a></li> </ul> </div>
   </div>
 
-  <!-- Main Dashboard -->
+  <!-- Header -->
+  <header>
+    <h1>E-Ration Distributor Dashboard</h1>
+  </header>
+
+  <!-- Main Content -->
   <div class="main">
-    <header>
-      <h1>E-Ration Distributor Dashboard</h1>
-    </header>
 
-    <div class="card">
-      <h2>Inventory & Stock Management</h2>
-      <div class="alert">⚠️ Discrepancy: Wheat balance doesn't match with distribution log!</div>
-      <table>
-        <thead>
-          <tr><th>Item</th><th>Current Stock</th><th>Stock Inward</th><th>Stock Outward</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          <tr class="low-stock"><td>Wheat</td><td>30 kg</td><td>300 kg</td><td>270 kg</td><td>⚠️ Low Stock</td></tr>
-          <tr><td>Rice</td><td>180 kg</td><td>200 kg</td><td>20 kg</td><td>OK</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Stock & Beneficiaries -->
+    <div class="cards">
+      <div class="card">
+        <h3>Stock Management</h3>
+        <table>
+          <tr><th>Item</th><th>Stock (kg)</th><th>Price (₹/kg)</th></tr>
+          <tr><td>Rice</td><td>500</td><td>3</td></tr>
+          <tr><td>Wheat</td><td>400</td><td>2</td></tr>
+          <tr><td>Sugar</td><td>200</td><td>30</td></tr>
+          <tr><td>Kerosene Oil</td><td>300</td><td>20</td></tr>
+        </table>
+      </div>
 
-    <div class="card">
-      <h2>Beneficiary Management</h2>
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>Entitlement</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>B001</td><td>Asha Devi</td><td>5kg Rice, 2kg Wheat</td><td>Active</td></tr>
-          <tr><td>B002</td><td>Ramesh Yadav</td><td>3kg Rice, 1kg Sugar</td><td>Pending</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>Reports & Analytics</h2>
-      <div class="chart-container">
-        <div id="sunburst-container"></div>
-        <div class="legend" id="legend"></div>
+      <div class="card">
+        <h3>Beneficiary Management</h3>
+        <table>
+          <tr><th>ID</th><th>Name</th><th>Status</th></tr>
+          <tr><td>1</td><td>Beneficiary A</td><td>Active</td></tr>
+          <tr><td>2</td><td>Beneficiary B</td><td>Active</td></tr>
+          <tr><td>3</td><td>Beneficiary C</td><td>Inactive</td></tr>
+          <tr><td>4</td><td>Beneficiary D</td><td>Active</td></tr>
+          <tr><td>5</td><td>Beneficiary E</td><td>Active</td></tr>
+          <tr><td>6</td><td>Beneficiary F</td><td>Active</td></tr>
+          <tr><td>7</td><td>Beneficiary G</td><td>Inactive</td></tr>
+          <tr><td>8</td><td>Beneficiary H</td><td>Active</td></tr>
+          <tr><td>9</td><td>Beneficiary I</td><td>Active</td></tr>
+          <tr><td>10</td><td>Beneficiary J</td><td>Active</td></tr>
+        </table>
       </div>
     </div>
+   
 
-    <div class="card">
-      <h2>Helpdesk & Support</h2>
-      <p>Need help? Contact the central support team at 
-         call 1800-123-456.
-      </p>
+    <!-- Charts -->
+    <div class="chart-container">
+      <h3>Distribution by Category (Sunburst)</h3>
+      <div id="sunburst"></div>
     </div>
+
+    <div class="chart-container">
+      <h3>Ration Distribution Over Months</h3>
+      <div id="barChart"></div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Government Subsidy Allocation (Static Data)</h3>
+      <div id="pieChart"></div>
+    </div>
+
   </div>
+   <!-- Helpdesk --> <div class="card"> <h2>Helpdesk & Support</h2> <p>Need help? Contact the central support team at 📞 1800-123-456.</p> </div> </div>
 
-  <!-- Highcharts for Sunburst Chart -->
-  <script src="https://code.highcharts.com/highcharts.js"></script>
-  <script src="https://code.highcharts.com/modules/sunburst.js"></script>
   <script>
-    const kpis = [
-      { id: 'Satisfaction', name: 'Beneficiary Satisfaction', value: 85 },
-      { id: 'FillRate', name: 'Fill Rate', value: 65 },
-      { id: 'DSI', name: 'Days Sales of Inventory', value: 40 },
-      { id: 'Accuracy', name: 'Inventory Accuracy', value: 90 },
-      { id: 'Turnover', name: 'Inventory Turnover Rate', value: 22 }
-    ];
+    // Toggle Sidebar
+    function toggleNav() {
+      const sidebar = document.getElementById("sidebar");
+      if (sidebar.style.width === "250px") {
+        sidebar.style.width = "0";
+      } else {
+        sidebar.style.width = "250px";
+      }
+    }
 
-    const data = [{ id: 'root', parent: '', name: 'KPIs' }, ...kpis.map(k => ({
-      id: k.id, parent: 'root', name: k.name, value: k.value
-    }))];
+    // Sunburst Chart
+    Plotly.newPlot("sunburst", [{
+      type: "sunburst",
+      labels: ["Total", "Rice", "Wheat", "Sugar", "Kerosene"],
+      parents: ["", "Total", "Total", "Total", "Total"],
+      values: [1400, 500, 400, 200, 300],
+      outsidetextfont: {size: 20, color: "#377eb8"},
+      leaf: {opacity: 0.6},
+      marker: {line: {width: 2}}
+    }], {margin: {t: 0, l: 0, r: 0, b: 0}});
 
-    const chart = Highcharts.chart('sunburst-container', {
-      chart: { height: 400 },
-      title: { text: 'Key Performance Indicators' },
-      series: [{
-        type: "sunburst",
-        data,
-        allowDrillToNode: true,
-        cursor: 'pointer',
-        dataLabels: {
-          format: '{point.name}',
-          filter: {
-            property: 'innerArcLength',
-            operator: '>',
-            value: 16
-          }
-        },
-        levels: [{
-          level: 1,
-          levelIsConstant: false,
-          dataLabels: { rotationMode: 'parallel' },
-          colorByPoint: true
-        }]
-      }],
-      tooltip: { pointFormat: '<b>{point.name}:</b> {point.value}%' }
-    });
+    // Bar Chart (Static)
+    Plotly.newPlot("barChart", [{
+      x: ["Jan", "Feb", "Mar", "Apr", "May"],
+      y: [300, 400, 350, 500, 450],
+      type: "bar",
+      marker: {color: "#00796b"}
+    }], {title: "Monthly Distribution (kg)"});
 
-    const legendBox = document.getElementById('legend');
-    chart.series[0].points.filter(p => p.parent === 'root').forEach(p => {
-      const div = document.createElement('div');
-      div.className = 'legend-item';
-      div.innerHTML = `<div class="color-box" style="background:${p.color}"></div><span>${p.name} (${p.value}%)</span>`;
-      div.addEventListener('click', () => chart.series[0].setRootNode(p.id));
-      legendBox.appendChild(div);
-    });
+    // Pie Chart (Government Subsidy Static Data)
+    Plotly.newPlot("pieChart", [{
+      values: [40, 30, 20, 10],
+      labels: ["Rice", "Wheat", "Sugar", "Kerosene"],
+      type: "pie"
+    }], {title: "Subsidy Allocation"});
   </script>
-
 </body>
-</html>*
+</html>

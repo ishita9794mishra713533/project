@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from flask import Flask, render_template,json, request, redirect, url_for, session, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from reportlab.lib.pagesizes import letter
@@ -254,6 +254,7 @@ def ration_requests():
 def view_beneficiary_list():
     beneficiaries = Beneficiary.query.all()
     return render_template("view_beneficiary_list.html", beneficiaries=beneficiaries)
+
 
 
 @app.route('/update_status', methods=['POST'])
